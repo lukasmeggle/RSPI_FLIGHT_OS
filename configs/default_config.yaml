@@ -17,8 +17,8 @@ pi_camera:
   height: 480
   framerate: "30/1"
   bitrate: 2500
-  stream: true
-  record: true
+  stream: false
+  record: false
   display: false
 
 compose:
