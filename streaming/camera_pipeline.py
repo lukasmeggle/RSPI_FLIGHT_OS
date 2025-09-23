@@ -39,7 +39,7 @@ class IRCameraPipeline(PipelineBase):
             for i, b in enumerate(branches):
                 cmd += [f"t.", "!", "queue"] + b
 
-        super().__init__(name="ir_camera", cmd=cmd, log_dir=log_dir, record_dir=record_dir)
+        super().__init__(name="ir_camera", cmd=cmd, log_dir=log_dir)
 
 
 class PiCameraPipeline(PipelineBase):
@@ -82,4 +82,4 @@ class PiCameraPipeline(PipelineBase):
         else:
             cmd_list = []
 
-        super().__init__(name="pi_camera", cmd=cmd_list, log_dir=log_dir, record_dir=record_dir)
+        super().__init__(name="pi_camera", cmd=cmd_list, log_dir=log_dir)
