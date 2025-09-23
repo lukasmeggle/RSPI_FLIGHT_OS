@@ -18,7 +18,7 @@ pi_camera:
   height: 480
   framerate: "30/1"
   bitrate: 2500
-  format: "I420"
+  format: "i420"
   stream: true
   record: true
   display: true
