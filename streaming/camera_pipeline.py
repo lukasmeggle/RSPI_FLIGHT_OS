@@ -112,27 +112,7 @@ class CameraPipeline(PipelineBase):
                 for b in branches_encoded:
                     cmd += ["encoded_t.", "!", "queue"] + b
 
-        return cmd
-
-    def start(self):
-        """Start pipeline (Pi camera handled with PIPE)."""
-        print(f"[INFO] Starting {self.name}, command: {' '.join(self.cmd)}")
-        if self.camera_type == "pi" and self.pi_process:
-            # Use fdsrc from Pi camera stdout
-            self.process = subprocess.Popen(["gst-launch-1.0", "-e"] + self.cmd, stdin=self.pi_process.stdout) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
-        else:
-            self.process = subprocess.Popen(["gst-launch-1.0", "-e"] + self.cmd) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
-        print(f"[INFO] {self.name} started.")
-
-    def stop(self):
-        if hasattr(self, "process") and self.process:
-            self.process.terminate()
-            self.process.wait()
-        if self.pi_process:
-            self.pi_process.terminate()
-            self.pi_process.wait()
-        print(f"[INFO] {self.name} stopped.")
-
+        return ["gst-launch-1.0", "-e"] + cmd # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
@@ -142,4 +122,4 @@ class IRCameraPipeline(CameraPipeline):
 
 class PiCameraPipeline(CameraPipeline):
     def __init__(self, cfg, laptop_ip, log_dir, record_dir):
-        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir)
+        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir, stdin=self.pi_process.stdout)

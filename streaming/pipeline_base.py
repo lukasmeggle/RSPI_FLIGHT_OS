@@ -1,12 +1,13 @@
 import subprocess, os, signal
 
 class PipelineBase:
-    def __init__(self, name, cmd, log_dir):
+    def __init__(self, name, cmd, log_dir, stdin_processes=None):
         self.name = name
         self.cmd = cmd
         self.log_dir = log_dir
         self.process = None
         self.log_file = None
+        self.stdin_processes = stdin_processes
 
 
     def start(self):
@@ -16,6 +17,7 @@ class PipelineBase:
             self.cmd,
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
+            stdin=self.stdin_processes.stdout if self.stdin_processes else None, # Use output of another process as input if provided
             preexec_fn=os.setsid
         )
         print(f"[INFO] Started {self.name} -> log: {log_path}")
@@ -26,7 +28,11 @@ class PipelineBase:
     def stop(self):
         if self.process and self.is_running():
             print(f"[INFO] Stopping {self.name}...")
-            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+            self.process.terminate()
             self.process.wait()
-        if self.log_file:
-            self.log_file.close()
+            print(f"[INFO] {self.name} process terminated.")
+        if self.stdin_processes:
+            print(f"[INFO] Terminating {self.name} stdin process...")
+            self.stdin_processes.terminate()
+            self.stdin_processes.wait()
+            print(f"[INFO] {self.name} stdin process terminated.")

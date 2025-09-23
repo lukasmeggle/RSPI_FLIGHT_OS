@@ -15,6 +15,7 @@ class StreamManager:
         # Create record directory if recording is enabled
         if self.cfg["ir_camera"]["record"] or self.cfg["pi_camera"]["record"]:
             os.makedirs(self.record_dir, exist_ok=True)
+            print(f"[INFO] Recordings will be saved to {self.record_dir}")
 
         # Initialize pipelines based on config
         if self.cfg["ir_camera"]["stream"] or self.cfg["ir_camera"]["record"] or self.cfg["ir_camera"]["display"]:
