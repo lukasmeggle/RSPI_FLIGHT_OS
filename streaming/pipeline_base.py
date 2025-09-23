@@ -30,6 +30,23 @@ class PipelineBase:
     def stop(self):
         if self.process:
             print(f"[INFO] Stopping {self.name}...")
-            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
-            self.process.wait()
+
+            try:
+                # sauberes SIGINT senden (wie Ctrl+C für gst-launch-1.0)
+                os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+
+                # kurze Wartezeit, damit mp4mux/qtmux den moov atom schreiben kann
+                self.process.wait(timeout=5)
+
+            except subprocess.TimeoutExpired:
+                print(f"[WARN] {self.name} did not exit, sending SIGTERM...")
+                os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+                try:
+                    self.process.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    print(f"[ERROR] {self.name} still alive, forcing SIGKILL...")
+                    os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
+                    self.process.wait()
+
             print(f"[INFO] {self.name} process terminated.")
+            self.process = None
