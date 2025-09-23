@@ -111,8 +111,11 @@ class CameraPipeline(PipelineBase):
                         f"bitrate={bitrate}", "speed-preset=ultrafast", "!", "tee", "name=encoded_t"]
                 for b in branches_encoded:
                     cmd += ["encoded_t.", "!", "queue"] + b
+        
+        # Convert command list to string for Popen
+        cmd_str = " ".join(f"\"{arg}\"" for arg in cmd)
 
-        return ["gst-launch-1.0", "-e", cmd] # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
+        return ["gst-launch-1.0", "-e", cmd_str] # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
