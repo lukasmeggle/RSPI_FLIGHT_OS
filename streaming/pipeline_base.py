@@ -13,7 +13,7 @@ class PipelineBase:
     def start(self):
         log_path = os.path.join(self.log_dir, f"{self.name}.log")
         self.log_file = open(log_path, "w")
-        print(f"[INFO] Starting {self.name}, command: \n'''\n{' '.join(self.cmd)}\n'''")
+        print(f"[INFO] Starting {self.name}, command: \n'''\n{self.cmd}\n'''")
         self.process = subprocess.Popen(
             self.cmd,
             stdout=self.log_file,
