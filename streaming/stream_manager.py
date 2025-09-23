@@ -35,7 +35,7 @@ class StreamManager:
         '''Monitor all active pipelines'''
         try:
             while True:
-                for obj in [self.ir_cam, self.pi_cam, self.compose]:
+                for obj in self.pipelines:
                     if obj and not obj.is_running():
                         print(f"[ERROR] {obj.name} stopped unexpectedly")
                         self.stop_all()
