@@ -16,6 +16,7 @@ class PipelineBase:
         print(f"[INFO] Starting {self.name}, command: \n'''\n{self.cmd}\n'''")
         self.process = subprocess.Popen(
             self.cmd,
+            shell=True,
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
             stdin=self.stdin_processes.stdout if self.stdin_processes else None, # Use output of another process as input if provided
