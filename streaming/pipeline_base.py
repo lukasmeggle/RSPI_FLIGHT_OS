@@ -1,4 +1,4 @@
-import subprocess, os, signal, datetime
+import subprocess, os, signal
 
 class PipelineBase:
     def __init__(self, name, cmd, log_dir):

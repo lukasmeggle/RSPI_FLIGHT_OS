@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 import os, sys
+
+# Add the parent directory to Python path so we can import streaming module
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from streaming.stream_manager import StreamManager
 
 if __name__ == "__main__":
