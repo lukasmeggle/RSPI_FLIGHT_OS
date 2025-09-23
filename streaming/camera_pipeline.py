@@ -84,38 +84,32 @@ class CameraPipeline(PipelineBase):
         return ["max-size-buffers=1", "leaky=downstream", "!", "kmssink", "sync=false"]
 
     def _build_pipeline(self, source_cmd, bitrate, stream_branch, record_branch, display_branch):
-        """Build unified pipeline for both IR and Pi cameras."""
         branches_encoded = [b for b in [stream_branch, record_branch] if b]
         branches_raw = [display_branch] if display_branch else []
 
         if not branches_encoded and not branches_raw:
             return []
 
-        # Start with source
-        cmd = source_cmd.copy()
+        # source_cmd ist jetzt ein string
+        pipeline = source_cmd
 
         if branches_encoded or branches_raw:
             if len(branches_encoded) + len(branches_raw) > 1:
-                cmd += ["!", "tee", "name=t"]
+                pipeline += " ! tee name=t"
 
-            # Add raw branches
+            # raw branches
             for b in branches_raw:
-                cmd += ["t.", "!", "queue"] + b
+                pipeline += f" t. ! queue {b}"
 
-            # Add encoded branches
+            # encoded branches
             if len(branches_encoded) == 1:
-                cmd += ["t.", "!", "queue", "!", "x264enc", "tune=zerolatency",
-                        f"bitrate={bitrate}", "speed-preset=ultrafast", "!"] + branches_encoded[0]
+                pipeline += f" t. ! queue ! x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast ! {branches_encoded[0]}"
             elif len(branches_encoded) > 1:
-                cmd += ["t.", "!", "queue", "!", "x264enc", "tune=zerolatency",
-                        f"bitrate={bitrate}", "speed-preset=ultrafast", "!", "tee", "name=encoded_t"]
+                pipeline += f" t. ! queue ! x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast ! tee name=encoded_t"
                 for b in branches_encoded:
-                    cmd += ["encoded_t.", "!", "queue"] + b
-        
-        # Convert command list to string for Popen
-        cmd_str = " ".join(cmd)
+                    pipeline += f" encoded_t. ! queue {b}"
 
-        return ["gst-launch-1.0", "-e", cmd_str] # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
+        return ["gst-launch-1.0", "-e", pipeline]
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
