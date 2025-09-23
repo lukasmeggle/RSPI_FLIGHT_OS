@@ -37,7 +37,7 @@ class CameraPipeline(PipelineBase):
             # Build source command for ir camera, use v4l2src
             device = cfg["device"]
             self.source_cmd = [
-                "v4l2src", f"device={device}", "-e",  # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
+                "v4l2src", f"device={device}",
                 "!", f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate}",
                 "!", "videoconvert"
             ]
@@ -119,9 +119,9 @@ class CameraPipeline(PipelineBase):
         print(f"[INFO] Starting {self.name}, command: {' '.join(self.cmd)}")
         if self.camera_type == "pi" and self.pi_process:
             # Use fdsrc from Pi camera stdout
-            self.process = subprocess.Popen(["gst-launch-1.0"] + self.cmd, stdin=self.pi_process.stdout)
+            self.process = subprocess.Popen(["gst-launch-1.0", "-e"] + self.cmd, stdin=self.pi_process.stdout) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
         else:
-            self.process = subprocess.Popen(["gst-launch-1.0"] + self.cmd)
+            self.process = subprocess.Popen(["gst-launch-1.0"] + self.cmd) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
         print(f"[INFO] {self.name} started.")
 
     def stop(self):
