@@ -10,7 +10,7 @@ ir_camera:
   bitrate: 2000
   stream: true
   record: true
-  display: false
+  display: true
 
 pi_camera:
   width: 640
