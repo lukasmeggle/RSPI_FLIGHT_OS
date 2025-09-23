@@ -1,0 +1,29 @@
+laptop_ip: "100.72.4.68"
+log_dir: "/home/ubuntu/stream_logs"
+record_dir: "/home/ubuntu/stream_records"
+
+ir_camera:
+  device: "/dev/video0"
+  width: 640
+  height: 512
+  framerate: "60/1"
+  bitrate: 2000
+  stream: true
+  record: false
+  display: false
+
+pi_camera:
+  width: 640
+  height: 480
+  framerate: "30/1"
+  bitrate: 2500
+  stream: true
+  record: false
+  display: false
+
+compose:
+  enabled: false
+  overlay_text: "FPV Demo"
+  hdmi: true
+  record: false
+  stream: false
