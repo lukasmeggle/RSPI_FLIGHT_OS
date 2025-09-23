@@ -121,7 +121,7 @@ class CameraPipeline(PipelineBase):
             # Use fdsrc from Pi camera stdout
             self.process = subprocess.Popen(["gst-launch-1.0", "-e"] + self.cmd, stdin=self.pi_process.stdout) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
         else:
-            self.process = subprocess.Popen(["gst-launch-1.0"] + self.cmd) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
+            self.process = subprocess.Popen(["gst-launch-1.0", "-e"] + self.cmd) # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
         print(f"[INFO] {self.name} started.")
 
     def stop(self):
