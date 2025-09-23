@@ -81,7 +81,7 @@ class CameraPipeline(PipelineBase):
         return ["mp4mux", "!", "filesink", f"location={filepath}", "async=false"]
 
     def _build_display_branch(self):
-        return ["queue", "max-size-buffers=1", "leaky=downstream", "!", "kmssink", "sync=false"]
+        return ["max-size-buffers=1", "leaky=downstream", "!", "kmssink", "sync=false"]
 
     def _build_pipeline(self, source_cmd, bitrate, stream_branch, record_branch, display_branch):
         """Build unified pipeline for both IR and Pi cameras."""
