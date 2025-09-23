@@ -6,7 +6,7 @@ ir_camera:
   device: "/dev/video0"
   width: 640
   height: 512
-  framerate: "60/1"
+  framerate: "30/1"
   bitrate: 2000
   stream: true
   record: true

@@ -37,7 +37,7 @@ class CameraPipeline(PipelineBase):
             device = cfg["device"]
             self.source_cmd = [
                 "v4l2src", f"device={device}",
-                "!", f"video/x-raw,width={self.width},height={self.height},framerate={self.framerate}",
+                "!", f"video/x-raw,width={self.width},height={self.height},framerate={self.framerate},format=YU12",
                 "!", "videoconvert"
             ]
             self.pi_process = None
