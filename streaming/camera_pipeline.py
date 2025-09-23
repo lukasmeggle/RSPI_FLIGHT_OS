@@ -93,7 +93,6 @@ class CameraPipeline(PipelineBase):
                     pipeline += f" encoded_t. ! queue {b}"
 
         full_cmd = f"gst-launch-1.0 -e {pipeline}"
-        print(f"[DEBUG] Built pipeline: {full_cmd}")
         return full_cmd
 
 # Convenience classes

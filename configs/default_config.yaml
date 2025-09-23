@@ -9,9 +9,9 @@ ir_camera:
   framerate: "60/1"
   bitrate: 2000
   format: "I420"
-  stream: false
-  record: false
-  display: false
+  stream: True
+  record: True
+  display: True
 
 pi_camera:
   width: 640
@@ -19,9 +19,9 @@ pi_camera:
   framerate: "30/1"
   bitrate: 2500
   format: "i420"
-  stream: true
-  record: true
-  display: true
+  stream: False
+  record: False
+  display: False
 
 compose:
   enabled: false
