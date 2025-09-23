@@ -36,11 +36,12 @@ class CameraPipeline(PipelineBase):
             self.record_filename = "ir_output.mp4"
             # Build source command for ir camera, use v4l2src
             device = cfg["device"]
-            self.source_cmd = [
-                "v4l2src", f"device={device}",
-                "!", f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate}",
-                "!", "videoconvert"
-            ]
+            self.source_cmd = f"""
+                v4l2src device={device} \
+                ! video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} \
+                ! videoconvert \
+                """
+            
             self.pi_process = None
 
         # Set up for pi camera
@@ -48,16 +49,16 @@ class CameraPipeline(PipelineBase):
             self.name = "pi_camera"
             self.stream_port = 5001
             self.record_filename = "pi_output.mp4"
-            # Build source command for pi camera, use rpicam-vid and use subprocess PIPE in order to not use bash shell
-            self.pi_process = subprocess.Popen(
-                ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420"],
-                stdout=subprocess.PIPE
-            )
-            self.source_cmd = [
-                "fdsrc",
-                "!", f"videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format}",
-                "!", "videoconvert"
-            ]
+            # Build source command for pi camera, use rpicam-vid as a shell string
+            self.source_cmd = f"""
+                rpicam-vid -t 0 -o - --codec yuv420 ! videoparse width={self.width} height={self.height} \
+                framerate={self.framerate} format={self.video_format} ! videoconvert \
+                """
+            self.source_cmd = f"""
+                fdsrc \
+                ! videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} \
+                ! videoconvert
+                """
         else:
             raise ValueError("camera_type must be 'ir' or 'pi'")
 
@@ -74,14 +75,14 @@ class CameraPipeline(PipelineBase):
         super().__init__(name=self.name, cmd=self.cmd, log_dir=self.log_dir)
 
     def _build_stream_branch(self, laptop_ip, port):
-        return ["rtph264pay", "!", "udpsink", f"host={laptop_ip}", f"port={port}"]
+        return f" rtph264pay ! udpsin host={laptop_ip} port={port}"
 
     def _build_record_branch(self, record_dir, filename):
         filepath = os.path.join(record_dir, filename)
-        return ["mp4mux", "!", "filesink", f"location={filepath}", "async=false"]
+        return f"mp4mux ! filesink location={filepath} async=false"
 
     def _build_display_branch(self):
-        return ["max-size-buffers=1", "leaky=downstream", "!", "kmssink", "sync=false"]
+        return "max-size-buffers=1 leaky=downstream ! kmssink sync=false"
 
     def _build_pipeline(self, source_cmd, bitrate, stream_branch, record_branch, display_branch):
         branches_encoded = [b for b in [stream_branch, record_branch] if b]
@@ -111,7 +112,7 @@ class CameraPipeline(PipelineBase):
 
 
         print(f"[DEBUG] Built pipeline: {pipeline}")
-        
+
         return ["gst-launch-1.0", "-e", pipeline]
 
 # Convenience classes
