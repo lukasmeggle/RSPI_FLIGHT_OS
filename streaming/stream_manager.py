@@ -8,6 +8,8 @@ class StreamManager:
         with open(config_file) as f:
             self.cfg = yaml.safe_load(f)
         self.log_dir = os.path.join(self.cfg["log_dir"], datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+        os.makedirs(self.log_dir, exist_ok=True)
+        print(f"[INFO] Logs will be saved to {self.log_dir}")
         self.record_dir = os.path.join(self.cfg["record_dir"], datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
         self.laptop_ip = self.cfg["laptop_ip"]
         self.pipelines = []
