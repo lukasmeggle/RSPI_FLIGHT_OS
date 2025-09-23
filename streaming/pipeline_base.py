@@ -11,7 +11,6 @@ class PipelineBase:
 
     def start(self):
         log_path = os.path.join(self.log_dir, f"{self.name}.log")
-        os.makedirs(self.log_dir, exist_ok=True)
         self.log_file = open(log_path, "w")
         self.process = subprocess.Popen(
             self.cmd,

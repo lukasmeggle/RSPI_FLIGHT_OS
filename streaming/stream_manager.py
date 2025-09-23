@@ -31,19 +31,17 @@ class StreamManager:
                 p.start()
         print("[INFO] All pipelines started.")
 
-    def monitor(self):
+    def monitor(self, interval=5):
+        '''Monitor all active pipelines'''
         try:
             while True:
-                for p in self.pipelines:
-                    if not p.is_running():
-                        print(f"[ERROR] {p.name} stopped unexpectedly")
+                for obj in [self.ir_cam, self.pi_cam, self.compose]:
+                    if obj and not obj.is_running():
+                        print(f"[ERROR] {obj.name} stopped unexpectedly")
+                        self.stop_all()
                         return
                 print("[INFO] Pipelines running...")
-                time.sleep(5)
+                time.sleep(interval)
         except KeyboardInterrupt:
             print("[INFO] Ctrl+C detected, stopping pipelines...")
             self.stop_all()
-
-    def stop_all(self):
-        for p in self.pipelines:
-            p.stop()
