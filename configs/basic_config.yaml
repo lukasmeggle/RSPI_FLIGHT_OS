@@ -9,7 +9,7 @@ ir_camera:
   framerate: "60/1"
   bitrate: 2000
   stream: true
-  record: false
+  record: true
   display: false
 
 pi_camera:
@@ -18,7 +18,7 @@ pi_camera:
   framerate: "30/1"
   bitrate: 2500
   stream: true
-  record: false
+  record: true
   display: false
 
 compose:
