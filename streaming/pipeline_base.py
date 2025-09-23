@@ -28,13 +28,8 @@ class PipelineBase:
         return self.process and (self.process.poll() is None)
 
     def stop(self):
-        if self.process and self.is_running():
+        if self.process:
             print(f"[INFO] Stopping {self.name}...")
-            self.process.terminate()
+            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
             self.process.wait()
             print(f"[INFO] {self.name} process terminated.")
-        if self.stdin_processes:
-            print(f"[INFO] Terminating {self.name} stdin process...")
-            self.stdin_processes.terminate()
-            self.stdin_processes.wait()
-            print(f"[INFO] {self.name} stdin process terminated.")
