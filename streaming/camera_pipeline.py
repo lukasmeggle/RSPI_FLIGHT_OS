@@ -115,6 +115,7 @@ class CameraPipeline(PipelineBase):
 
     def start(self):
         """Start pipeline (Pi camera handled with PIPE)."""
+        print(f"[INFO] Starting {self.name}, command: {' '.join(self.cmd)}")
         if self.camera_type == "pi" and self.pi_process:
             # Use fdsrc from Pi camera stdout
             self.process = subprocess.Popen(["gst-launch-1.0"] + self.cmd, stdin=self.pi_process.stdout)
