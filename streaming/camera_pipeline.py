@@ -109,6 +109,9 @@ class CameraPipeline(PipelineBase):
                 for b in branches_encoded:
                     pipeline += f" encoded_t. ! queue {b}"
 
+
+        print(f"[DEBUG] Built pipeline: {pipeline}")
+        
         return ["gst-launch-1.0", "-e", pipeline]
 
 # Convenience classes
