@@ -112,7 +112,7 @@ class CameraPipeline(PipelineBase):
                 for b in branches_encoded:
                     cmd += ["encoded_t.", "!", "queue"] + b
 
-        return ["gst-launch-1.0", "-e"] + cmd # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
+        return ["gst-launch-1.0", "-e", cmd] # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
