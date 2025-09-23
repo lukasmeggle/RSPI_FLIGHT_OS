@@ -113,7 +113,7 @@ class CameraPipeline(PipelineBase):
                     cmd += ["encoded_t.", "!", "queue"] + b
         
         # Convert command list to string for Popen
-        cmd_str = " ".join(f"\"{arg}\"" for arg in cmd)
+        cmd_str = " ".join(cmd)
 
         return ["gst-launch-1.0", "-e", cmd_str] # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
 
