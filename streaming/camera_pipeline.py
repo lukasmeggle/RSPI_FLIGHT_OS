@@ -37,7 +37,7 @@ class CameraPipeline(PipelineBase):
             # Build source command for ir camera, use v4l2src
             device = cfg["device"]
             self.source_cmd = [
-                "v4l2src", f"device={device}",
+                "v4l2src", f"device={device}", "-e",  # e-flag sends EOS on shutdown in order to not corrupt unfinished mp4 recordings
                 "!", f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate}",
                 "!", "videoconvert"
             ]
