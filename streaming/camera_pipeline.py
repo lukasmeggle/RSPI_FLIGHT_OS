@@ -23,6 +23,7 @@ class CameraPipeline(PipelineBase):
         self.height = cfg["height"]
         self.framerate = cfg["framerate"]
         self.bitrate = cfg["bitrate"]
+        self.video_format = cfg.get("video_format", "I420")  # Default to I420 if not specified
 
         self.stream_enabled = cfg.get("stream", False)
         self.record_enabled = cfg.get("record", False)
@@ -37,7 +38,7 @@ class CameraPipeline(PipelineBase):
             device = cfg["device"]
             self.source_cmd = [
                 "v4l2src", f"device={device}",
-                "!", f"video/x-raw,format=YU12,width={self.width},height={self.height},framerate={self.framerate}",
+                "!", f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate}",
                 "!", "videoconvert"
             ]
             self.pi_process = None
@@ -54,7 +55,7 @@ class CameraPipeline(PipelineBase):
             )
             self.source_cmd = [
                 "fdsrc",
-                "!", f"videoparse width={self.width} height={self.height} framerate={self.framerate} format=i420",
+                "!", f"videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format}",
                 "!", "videoconvert"
             ]
         else:
