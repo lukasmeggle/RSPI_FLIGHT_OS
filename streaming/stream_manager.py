@@ -1,4 +1,5 @@
 import yaml, time, datetime, os
+from gi.repository import Gst, GObject
 from .camera_pipeline import IRCameraPipeline, PiCameraPipeline
 
 class StreamManager:
