@@ -31,6 +31,13 @@ class StreamManager:
                 p.start()
         print("[INFO] All pipelines started.")
 
+    def stop_all(self):
+        ''' Stop all active pipelines'''
+        for p in self.pipelines:
+            if p and p.is_running():
+                p.stop()
+        print("[INFO] All pipelines stopped.")
+
     def monitor(self, interval=5):
         '''Monitor all active pipelines'''
         try:
