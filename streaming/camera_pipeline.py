@@ -27,7 +27,7 @@ class CameraPipeline(PipelineBase):
             device = cfg["device"]
             self.source_cmd = (
                 f"v4l2src device={device} !"
-                f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} !"
+                f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} ! "
             )
             self.pi_process = None
 
@@ -36,9 +36,9 @@ class CameraPipeline(PipelineBase):
             self.stream_port = 5001
             self.record_filename = "pi_output.mp4"
             self.source_cmd = (
-                f"fdsrc !"
-                f"videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} !"
-                f"videoconvert ! video/x-raw,format=NV12,width=640,height=480 !"
+                f"fdsrc ! "
+                f"videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} ! "
+                f"videoconvert ! video/x-raw,format=NV12,width=640,height=480 ! "
             )
             self.pi_process = subprocess.Popen(
                 ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420", "--nopreview"],
@@ -55,13 +55,12 @@ class CameraPipeline(PipelineBase):
 
     def _build_pipeline(self):
 
-        pipeline_parts = [f"{self.source_cmd} tee name=t"]  # Raw-split
+        pipeline_parts = [f"{self.source_cmd} tee name=t "]  # Raw-split
 
         # Display-Branch (Raw Data)
         if self.display_enabled:
             pipeline_parts.append(
-                "t. ! queue "
-                "! videoconvert "
+                "t. ! queue max-size-buffers=1 leaky=downstream ! "
                 "! autovideosink sync=false"
             )
 
@@ -70,8 +69,7 @@ class CameraPipeline(PipelineBase):
             # Encode once and use tee to split
             pipeline_parts.append(
                 "t. ! queue "
-                f"! x264enc bitrate={self.bitrate} speed-preset=superfast tune=zerolatency "
-                "! h264parse "
+                f"! x264enc bitrate={self.bitrate} speed-preset=ultrafast tune=zerolatency "
                 "! tee name=enc"
             )
 
@@ -79,7 +77,7 @@ class CameraPipeline(PipelineBase):
             if self.stream_enabled:
                 pipeline_parts.append(
                     "enc. ! queue "
-                    "! rtph264pay config-interval=1 pt=96 "
+                    "! rtph264pay "
                     f"! udpsink host={self.laptop_ip} port={self.stream_port}"
                 )
 
@@ -99,7 +97,7 @@ class CameraPipeline(PipelineBase):
         cmd = " ".join(pipeline_parts)
         print(f"[Pipeline {self.name}] CMD:\n{cmd}\n")
 
-        self.cmd = ["gstreamer-launch-1.0", "-e", cmd.split()]
+        return ["gst-launch-1.0", "-e"] + cmd.split()
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
