@@ -21,7 +21,7 @@ pi_camera:
   video_format: "i420"
   stream: True
   record: False
-  display: True
+  display: False
 
 compose:
   enabled: false
