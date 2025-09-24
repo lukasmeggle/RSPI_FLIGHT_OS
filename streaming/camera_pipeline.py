@@ -72,7 +72,7 @@ class CameraPipeline(PipelineBase):
         return f"! mp4mux ! filesink location={filepath} async=false"
 
     def _build_display_branch(self):
-        return "! queue max-size-buffers=1 leaky=downstream ! kmssink sync=false"
+        return "! kmssink sync=false"
 
     def _build_pipeline(self, source_cmd, bitrate, stream_branch, record_branch, display_branch):
         branches_encoded = [b for b in [stream_branch, record_branch] if b]
