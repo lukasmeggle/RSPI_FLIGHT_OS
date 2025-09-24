@@ -60,7 +60,7 @@ class CameraPipeline(PipelineBase):
         # Display-Branch (Raw Data)
         if self.display_enabled:
             pipeline_parts.append(
-                "t. ! queue max-size-buffers=1 leaky=downstream ! "
+                "t. ! queue max-size-buffers=1 leaky=downstream "
                 "! autovideosink sync=false"
             )
 
