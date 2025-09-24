@@ -55,7 +55,7 @@ class CameraPipeline(PipelineBase):
 
     def _build_pipeline(self):
 
-        pipeline_parts = [f"{self.source_cmd} ! tee name=t"]  # Raw-split
+        pipeline_parts = [f"{self.source_cmd} tee name=t"]  # Raw-split
 
         # Display-Branch (Raw Data)
         if self.display_enabled:
