@@ -25,111 +25,84 @@ class CameraPipeline(PipelineBase):
             self.stream_port = 5000
             self.record_filename = "ir_output.mp4"
             device = cfg["device"]
-            self.source_cmd = f"""
-                v4l2src device={device} !
-                  video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} !
-                  videoconvert ! video/x-raw,format=NV12,width={self.width},height={self.height}
-            """
+            self.source_cmd = (
+                f"v4l2src device={device} !"
+                f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} !"
+            )
             self.pi_process = None
 
         elif camera_type == "pi":
             self.name = "pi_camera"
             self.stream_port = 5001
             self.record_filename = "pi_output.mp4"
-            self.source_cmd = f"""
-                fdsrc !
-                  videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} !
-                  videoconvert ! video/x-raw,format=NV12,width={self.width},height={self.height}
-            """
+            self.source_cmd = (
+                f"fdsrc !"
+                f"videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} !"
+                f"videoconvert ! video/x-raw,format=NV12,width=640,height=480 !"
+            )
             self.pi_process = subprocess.Popen(
                 ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420", "--nopreview"],
                 stdout=subprocess.PIPE
             )
         else:
             raise ValueError("camera_type must be 'ir' or 'pi'")
-
-        # Branches
-        self.stream_branch = self._build_stream_branch(laptop_ip, self.stream_port) if self.stream_enabled else None
-        self.record_branch = self._build_record_branch(record_dir, self.record_filename) if self.record_enabled else None
-        self.display_branch = self._build_display_branch() if self.display_enabled else None
-
-        # Pipeline zusammenbauen
-        self.cmd = self._build_pipeline(
-            self.source_cmd,
-            self.bitrate,
-            self.stream_branch,
-            self.record_branch,
-            self.display_branch
-        )
-
-        # Pipeline schön ausgeben
-        print("\n[INFO] Final assembled GStreamer pipeline:\n")
-        print(self.cmd)
-        print("\n")
+        
+        # Vollständige Pipeline
+        self.cmd = self._build_pipeline()
 
         super().__init__(name=self.name, cmd=self.cmd, log_dir=self.log_dir, stdin_processes=self.pi_process)
 
-    def _build_stream_branch(self, laptop_ip, port):
-        return f"""
-            ! rtph264pay config-interval=1 pt=96 !
-              udpsink host={laptop_ip} port={port}
-        """
 
-    def _build_record_branch(self, record_dir, filename):
-        filepath = os.path.join(record_dir, filename)
-        return f"""
-            ! h264parse config-interval=-1 !
-              mp4mux fragment-duration=1000 streamable=true !
-              filesink location={filepath} async=false
-        """
+    def _build_pipeline(self):
 
-    def _build_display_branch(self):
-        return f"""
-            ! queue max-size-buffers=1 leaky=downstream !
-              kmssink sync=false
-        """
+        pipeline_parts = [f"{self.source_cmd} ! tee name=t"]  # Raw-split
 
-    def _build_pipeline(self, source_cmd, bitrate, stream_branch, record_branch, display_branch):
-        branches_encoded = [b for b in [stream_branch, record_branch] if b]
-        branches_raw = [display_branch] if display_branch else []
+        # Display-Branch (Raw Data)
+        if self.display_enabled:
+            pipeline_parts.append(
+                "t. ! queue "
+                "! videoconvert "
+                "! autovideosink sync=false"
+            )
 
-        pipeline = f"""
-            {source_cmd} !
-              tee name=t
-        """
+        # Encoded-Branch
+        if self.stream_enabled or self.record_enabled:
+            # Encode once and use tee to split
+            pipeline_parts.append(
+                "t. ! queue "
+                f"! x264enc bitrate={self.bitrate} speed-preset=superfast tune=zerolatency "
+                "! h264parse "
+                "! tee name=enc"
+            )
 
-        # raw (unencoded) branch
-        for b in branches_raw:
-            pipeline += f"""
-              t. {b}
-            """
+            # Stream from encoded Branch
+            if self.stream_enabled:
+                pipeline_parts.append(
+                    "enc. ! queue "
+                    "! rtph264pay config-interval=1 pt=96 "
+                    f"! udpsink host={self.laptop_ip} port={self.stream_port}"
+                )
 
-        # encoded branches
-        if len(branches_encoded) == 1:
-            pipeline += f"""
-              t. ! queue !
-                x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast
-                {branches_encoded[0]}
-            """
-        elif len(branches_encoded) > 1:
-            pipeline += f"""
-              t. ! queue !
-                x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast !
-                tee name=encoded_t
-            """
-            for b in branches_encoded:
-                pipeline += f"""
-                  encoded_t. ! queue {b}
-                """
+            # Record from encoded Branch
+            if self.record_enabled:
+                outfile = os.path.join(self.record_dir, self.record_filename)
+                pipeline_parts.append(
+                    "enc. ! queue "
+                    f"! mp4mux ! filesink location={outfile}"
+                )
 
-        full_cmd = f"gst-launch-1.0 -e {pipeline}"
-        return "\n".join(line.rstrip() for line in full_cmd.splitlines() if line.strip())
+        # Fallback, if no output is enabled
+        if not (self.stream_enabled or self.record_enabled or self.display_enabled):
+            pipeline_parts.append("t. ! queue ! fakesink sync=false")
+
+        # Finale Command-Assembly + debug output
+        self.cmd = " ".join(pipeline_parts)
+        print(f"[Pipeline {self.name}] CMD:\n{self.cmd}\n")
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
     def __init__(self, cfg, laptop_ip, log_dir, record_dir):
         super().__init__("ir", cfg, laptop_ip, log_dir, record_dir)
-
 
 class PiCameraPipeline(CameraPipeline):
     def __init__(self, cfg, laptop_ip, log_dir, record_dir):
