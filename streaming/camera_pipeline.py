@@ -14,7 +14,7 @@ class CameraPipeline(PipelineBase):
         self.height = cfg["height"]
         self.framerate = cfg["framerate"]
         self.bitrate = cfg["bitrate"]
-        self.video_format = cfg.get("video_format", "I420")
+        self.video_format = cfg["video_format"]
 
         self.stream_enabled = cfg.get("stream", False)
         self.record_enabled = cfg.get("record", False)
