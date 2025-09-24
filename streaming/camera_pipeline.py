@@ -41,7 +41,10 @@ class CameraPipeline(PipelineBase):
                 f"! videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} "
                 "! videoconvert "
             )
-            self.pi_process = None
+            self.pi_process = subprocess.Popen(
+                ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420"],
+                stdout=subprocess.PIPE
+            )
         else:
             raise ValueError("camera_type must be 'ir' or 'pi'")
 
@@ -103,4 +106,4 @@ class IRCameraPipeline(CameraPipeline):
 
 class PiCameraPipeline(CameraPipeline):
     def __init__(self, cfg, laptop_ip, log_dir, record_dir):
-        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir)
+        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir, stdin_process=self.pi_process)
