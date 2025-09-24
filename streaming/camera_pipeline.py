@@ -62,7 +62,7 @@ class CameraPipeline(PipelineBase):
             self.display_branch
         )
 
-        super().__init__(name=self.name, cmd=self.cmd, log_dir=self.log_dir)
+        super().__init__(name=self.name, cmd=self.cmd, log_dir=self.log_dir, stdin_processes=self.pi_process)
 
     def _build_stream_branch(self, laptop_ip, port):
         return f"! rtph264pay ! udpsink host={laptop_ip} port={port}"
@@ -106,4 +106,4 @@ class IRCameraPipeline(CameraPipeline):
 
 class PiCameraPipeline(CameraPipeline):
     def __init__(self, cfg, laptop_ip, log_dir, record_dir):
-        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir, stdin_process=self.pi_process)
+        super().__init__("pi", cfg, laptop_ip, log_dir, record_dir)
