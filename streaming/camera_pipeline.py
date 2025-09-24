@@ -28,7 +28,7 @@ class CameraPipeline(PipelineBase):
             self.source_cmd = f"""
                 v4l2src device={device} !
                   video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} !
-                  videoconvert
+                  videoconvert ! video/x-raw,format=NV12,width={self.width},height={self.height}
             """
             self.pi_process = None
 
@@ -39,7 +39,7 @@ class CameraPipeline(PipelineBase):
             self.source_cmd = f"""
                 fdsrc !
                   videoparse width={self.width} height={self.height} framerate={self.framerate} format={self.video_format} !
-                  videoconvert
+                  videoconvert ! video/x-raw,format=NV12,width={self.width},height={self.height}
             """
             self.pi_process = subprocess.Popen(
                 ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420", "--nopreview"],
@@ -62,7 +62,7 @@ class CameraPipeline(PipelineBase):
             self.display_branch
         )
 
-        # Pipeline einmal schön formatiert ausgeben
+        # Pipeline schön ausgeben
         print("\n[INFO] Final assembled GStreamer pipeline:\n")
         print(self.cmd)
         print("\n")
@@ -85,8 +85,7 @@ class CameraPipeline(PipelineBase):
 
     def _build_display_branch(self):
         return f"""
-            ! video/x-raw,format=NV12,width={self.width},height={self.height} !
-              queue max-size-buffers=1 leaky=downstream !
+            ! queue max-size-buffers=1 leaky=downstream !
               kmssink sync=false
         """
 
@@ -124,7 +123,6 @@ class CameraPipeline(PipelineBase):
                 """
 
         full_cmd = f"gst-launch-1.0 -e {pipeline}"
-        # Trim leading/trailing spaces on each line, aber Struktur behalten
         return "\n".join(line.rstrip() for line in full_cmd.splitlines() if line.strip())
 
 # Convenience classes
