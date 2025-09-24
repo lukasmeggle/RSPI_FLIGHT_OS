@@ -28,7 +28,6 @@ class PipelineBase:
         # Setup logging
         log_path = os.path.join(self.log_dir, f"{self.name}.log")
         self.log_file = open(log_path, "w")
-        print(f"[INFO] Starting {self.name}, command: \n'''\n{self.cmd}\n'''")
 
         # Start subprocess (in its own process group)
         self.process = subprocess.Popen(
