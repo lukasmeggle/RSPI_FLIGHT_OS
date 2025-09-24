@@ -96,8 +96,10 @@ class CameraPipeline(PipelineBase):
             pipeline_parts.append("t. ! queue ! fakesink sync=false")
 
         # Finale Command-Assembly + debug output
-        self.cmd = " ".join(pipeline_parts)
+        cmd = " ".join(pipeline_parts)
         print(f"[Pipeline {self.name}] CMD:\n{self.cmd}\n")
+
+        self.cmd = ["gstreamer-launch-1.0", "-e", cmd.split()]
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
