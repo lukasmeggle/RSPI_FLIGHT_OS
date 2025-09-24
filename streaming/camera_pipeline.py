@@ -42,7 +42,7 @@ class CameraPipeline(PipelineBase):
                 "! videoconvert "
             )
             self.pi_process = subprocess.Popen(
-                ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420"],
+                ["rpicam-vid", "-t", "0", "-o", "-", "--codec", "yuv420", "--nopreview"],
                 stdout=subprocess.PIPE
             )
         else:
