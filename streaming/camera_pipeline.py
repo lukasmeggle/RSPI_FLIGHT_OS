@@ -26,7 +26,7 @@ class CameraPipeline(PipelineBase):
             self.record_filename = "ir_output.mp4"
             device = cfg["device"]
             self.source_cmd = (
-                f"v4l2src device={device} !"
+                f"v4l2src device={device} ! "
                 f"video/x-raw,format={self.video_format},width={self.width},height={self.height},framerate={self.framerate} ! "
             )
             self.pi_process = None
