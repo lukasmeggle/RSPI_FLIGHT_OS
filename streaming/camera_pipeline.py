@@ -62,7 +62,7 @@ class CameraPipeline(PipelineBase):
         if self.display_enabled:
             pipeline_parts.append(
                 "t. ! queue max-size-buffers=1 leaky=downstream "
-                "! autovideosink sync=false"
+                "! kmssink sync=false"
             )
 
         # Encoded-Branch
