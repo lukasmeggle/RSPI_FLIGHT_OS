@@ -20,7 +20,7 @@ pi_camera:
   bitrate: 2500
   video_format: "i420"
   stream: True
-  record: True
+  record: False
   display: True
 
 compose:
