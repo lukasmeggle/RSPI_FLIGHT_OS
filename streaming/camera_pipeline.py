@@ -97,7 +97,7 @@ class CameraPipeline(PipelineBase):
 
         # Finale Command-Assembly + debug output
         cmd = " ".join(pipeline_parts)
-        print(f"[Pipeline {self.name}] CMD:\n{self.cmd}\n")
+        print(f"[Pipeline {self.name}] CMD:\n{cmd}\n")
 
         self.cmd = ["gstreamer-launch-1.0", "-e", cmd.split()]
 
