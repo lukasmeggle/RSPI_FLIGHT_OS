@@ -1,4 +1,5 @@
 import os
+import shlex
 import subprocess
 from .pipeline_base import PipelineBase
 
@@ -94,10 +95,9 @@ class CameraPipeline(PipelineBase):
             pipeline_parts.append("t. ! queue ! fakesink sync=false")
 
         # Finale Command-Assembly + debug output
-        cmd = " ".join(pipeline_parts)
-        print(f"[Pipeline {self.name}] CMD:\n{cmd}\n")
-
-        return ["gst-launch-1.0", "-e"] + cmd.split()
+        cmd_str = " ".join(pipeline_parts)
+        print(f"[Pipeline {self.name}] CMD:\n{cmd_str}\n")
+        return ["gst-launch-1.0", "-e"] + shlex.split(cmd_str)
 
 # Convenience classes
 class IRCameraPipeline(CameraPipeline):
