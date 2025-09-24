@@ -40,6 +40,11 @@ class PipelineBase:
             preexec_fn=os.setsid
         )
         print(f"[INFO] Started {self.name} -> log: {log_path}")
+
+    def is_running(self):
+        main_alive = self.process and (self.process.poll() is None)
+        stdin_alive = (self.stdin_processes is None) or (self.stdin_processes.poll() is None)
+        return main_alive and stdin_alive
     
     def stop(self):
         """Stop the subprocess and its input pipeline (if any)."""
